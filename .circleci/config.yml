@@ -11,6 +11,12 @@ jobs:
       - run:
           name: Clone backend
           command: git clone https://github.com/Poulo22/labo1_CircleCi.git
+      - run:
+          name: Debug - List files and show package.json
+          command: |
+            cd labo1_CircleCi
+            ls -la
+            cat package.json
       - node/install-packages:
           pkg-manager: npm
           app-dir: ./labo1_CircleCi
