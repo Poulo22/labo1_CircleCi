@@ -11,9 +11,6 @@ jobs:
       - run:
           name: Clone backend
           command: git clone https://github.com/Poulo22/labo1_CircleCi.git
-#      - node/install-packages:
- #         pkg-manager: npm
-  #        app-dir: ./labo1_CircleCi
       - run:
           name: Run tests
           command: |
@@ -74,3 +71,5 @@ workflows:
           requires:
             - integrationFrontend
 
+
+# je test 
