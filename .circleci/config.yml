@@ -1,58 +1,75 @@
-# This config was automatically generated from your source code
-# Stacks detected: deps:node:3w5-h25-L01-frontend
 version: 2.1
+
 orbs:
-  node: circleci/node@5
+  node: circleci/node@5.0.2
+
 jobs:
-  test-node:
-    # Install node dependencies and run tests
-    executor: node/default
-    working_directory: ~/project/3w5-h25-L01-frontend
+  checkoutEtTests:
+    docker:
+      - image: cimg/node:14.20
     steps:
-      - checkout:
-          path: ~/project
+      - run:
+          name: Clone backend
+          command: git clone https://github.com/Poulo22/labo1_CircleCi.git
       - node/install-packages:
           pkg-manager: npm
+          app-dir: ./labo1_CircleCi
       - run:
           name: Run tests
-          command: npm test --passWithNoTests
-  build-node:
-    # Build node project
-    executor: node/default
-    working_directory: ~/project/3w5-h25-L01-frontend
+          command: |
+            cd labo1_CircleCi
+            npm test
+
+  integrationFrontend:
+    docker:
+      - image: cimg/node:14.20
     steps:
-      - checkout:
-          path: ~/project
+      - run:
+          name: Clone backend repo
+          command: git clone https://github.com/Poulo22/labo1_CircleCi.git
+      - run:
+          name: Clone frontend repo
+          command: git clone https://github.com/Poulo22/labo1_CircleCi_frontend.git
       - node/install-packages:
           pkg-manager: npm
+          app-dir: ./labo1_CircleCi_frontend
       - run:
-          command: npm run build
+          name: Build frontend
+          command: |
+            cd labo1_CircleCi_frontend
+            npm run build
       - run:
-          name: Create the ~/artifacts directory if it doesn't exist
-          command: mkdir -p ~/artifacts
-      # Copy output to artifacts dir
+          name: Dossier public backend
+          command: mkdir -p labo1_CircleCi/public
       - run:
-          name: Copy artifacts
-          command: cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
-      - store_artifacts:
-          path: ~/artifacts
-          destination: node-build
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
+          name: Copie Dossier public
+          command: cp -R labo1_CircleCi_frontend/build/* labo1_CircleCi/public/
+      - persist_to_workspace:
+          root: .
+          paths:
+            - labo1_CircleCi
+
+  deploiement:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:14.20
     steps:
-      # Replace this with steps to deploy to users
+      - attach_workspace:
+          at: .
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
+          name: liste dossier backend
+          command: |
+            cd labo1_CircleCi
+            ls -Rl
+
 workflows:
-  build-and-test:
+  version: 2
+  build-test-deploy:
     jobs:
-      - test-node
-      - build-node:
+      - checkoutEtTests
+      - integrationFrontend:
           requires:
-            - test-node
-    # - deploy:
-    #     requires:
-    #       - build-node
+            - checkoutEtTests
+      - deploiement:
+          requires:
+            - integrationFrontend
+
