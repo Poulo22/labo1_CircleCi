@@ -18,6 +18,8 @@ jobs:
           name: Run tests
           command: |
             cd labo1_CircleCi
+            npm install
+            npm ls cors
             npm test
 
   integrationFrontend:
